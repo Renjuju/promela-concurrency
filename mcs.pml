@@ -6,8 +6,7 @@ typedef LNode {
 }
 
 LNode mynode[proc+1];
-byte n;
-byte criticalSection[proc];
+byte criticalSection;
 byte tail;
 byte temp;
 byte counter;
@@ -40,7 +39,7 @@ inline release() {
     //compare and swap
     d_step {
       i = pred;
-      pred = (pred == _pid + 1) -> 0 : pred); //looked up cas algo
+      pred = (pred == _pid) -> 0 : pred); //looked up cas algorithm
     }
     if
     :: i == _pid+1;
@@ -57,9 +56,11 @@ active[proc] proctype p() {
   :: counter < 50 ->
     acquire();
     counter++;
+    criticalSection++;
+    assert(criticalSection == 1);
+    criticalSection--;
     release();
-  od;
-
+  od
 }
 
 ltl claim { always eventually counter == 334}
